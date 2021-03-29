@@ -11,13 +11,22 @@ import java.util.Date;
  */
 public class Bar {
     private Integer id;
-    private String bank;
+    private String bank_no;
     private String name;
     private String memo;
     private String rank;
     private String recode;
     private String count;
     private Date time;
+    private Bank bank;
+
+    public Bank getBank() {
+        return bank;
+    }
+
+    public void setBank(Bank bank) {
+        this.bank = bank;
+    }
 
     public Integer getId() {
         return id;
@@ -27,12 +36,12 @@ public class Bar {
         this.id = id;
     }
 
-    public String getBank() {
-        return bank;
+    public String getBank_no() {
+        return bank_no;
     }
 
-    public void setBank(String bank) {
-        this.bank = bank;
+    public void setBank_no(String bank_no) {
+        this.bank_no = bank_no;
     }
 
     public String getName() {

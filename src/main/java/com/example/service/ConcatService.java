@@ -11,5 +11,6 @@ public interface ConcatService {
 
     List<Line> selectLine();
 
-    List<Bar> selectBar();
+
+    List<Bar> selectBar(String bank_no);
 }

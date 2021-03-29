@@ -12,6 +12,8 @@ import org.apache.poi.xwpf.usermodel.XWPFChart;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.hibernate.validator.constraints.Range;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +28,8 @@ import java.util.Map;
 /**
  * @ClassName:ConcatController
  * @Author:sq
- * @Description:
+ * @Description:自动生成word报表
+ *
  * @Date:2021/3/4 16:09
  */
 @Controller
@@ -34,24 +37,24 @@ public class ConcatController {
 
     @Autowired
     private ConcatService concatService;
+    /**
+     * 日志对象
+     */
+    protected Logger logger = LoggerFactory.getLogger(getClass());
 
     public void inputRun() throws Exception {
         List<Line> ls =  concatService.selectLine();
-        List<Bar> bar = concatService.selectBar();
         for (int i = 0; i < ls.size(); i++) {
-       final String returnurl = "E:\\workstudy\\loverer-poi-demo-master\\poi-demo\\"+ls.get(i).getBank_no()+".docx";  // 结果文件
+           // System.out.println(ls.get(i).getBank().getRemark().toString());
+       final String returnurl = "E:\\workstudy\\demo\\testdemo\\"+ls.get(i).getBank_no()+".docx";  // 结果文件
        final String templateurl = "E:\\workstudy\\demo\\rr.docx";  // 模板文件
        InputStream is = new FileInputStream(new File(templateurl));
        XWPFDocument doc = new XWPFDocument(is);
-       // 替换word模板数据
-            Map m = new HashMap();
-            for (int j = 0; j < bar.size(); j++) {
-                if(bar.get(j).getBank().equals(ls.get(i).getBank_no())){
-                    m.put(bar.get(j).getMemo(),bar.get(j).getCount());
-                }
-            }
+            List<Bar> bar = concatService.selectBar(ls.get(i).getBank_no());
 
-        replaceAll(doc,ls.get(i),m);
+            // 替换word模板数据
+
+        replaceAll(doc,ls.get(i),bar);
         // 保存结果文件
         try {
         File file = new File(returnurl);
@@ -69,7 +72,7 @@ public class ConcatController {
     /**
      * @Description: 替换段落和表格中
      */
-    public  void replaceAll(XWPFDocument doc, Line ls,Map bar) throws Exception {
+    public  void replaceAll(XWPFDocument doc, Line ls,List<Bar> bar) throws Exception {
         //doParagraphs(doc); // 处理段落文字数据，包括文字和表格、图片
         doCharts(doc,ls,bar);  // 处理图表数据，柱状图、折线图、饼图啊之类的
     }
@@ -119,13 +122,14 @@ public class ConcatController {
      * @param doc
      * @throws FileNotFoundException
      */
-    public  void doCharts(XWPFDocument doc,Line ls,Map bar) throws FileNotFoundException {
-        /**----------------------------处理图表------------------------------------**/
+    public  void doCharts(XWPFDocument doc,Line ls,List<Bar> bar) throws FileNotFoundException {
 
+        /**----------------------------处理图表------------------------------------**/
+        logger.info("----------------------------处理图表--开始----------------------------------\n");
         // 数据准备
         List<String> titleArr = new ArrayList<String>();// 标题
-        titleArr.add("title");
-        titleArr.add("决策");
+        titleArr.add("RULE_MEMO");
+        titleArr.add("COUNT");
 
         List<String> fldNameArr = new ArrayList<String>();// 字段名
         fldNameArr.add("item1");
@@ -134,15 +138,19 @@ public class ConcatController {
         // 数据集合
         List<Map<String, String>> listItemsByType = new ArrayList<Map<String, String>>();
 
-        // 第一行数据
-        Map<String, String> base1 = new HashMap<String, String>();
+        if(bar.size()==0){
+
+
         for (int i = 0; i < bar.size(); i++) {
-            //base1.put("item1",bar.);
+        Map<String, String> base = new HashMap<String, String>();
+            base.put("item1",bar.get(i).getMemo());
+            base.put("item2",bar.get(i).getCount());
+            listItemsByType.add(base);
         }
        // base1.put("item1", bar.get(i));
         //base1.put("item2", bar.getCount());
 
-        // 第二行数据
+      /*  // 第二行数据
         Map<String, String> base2 = new HashMap<String, String>();
         base2.put("item1", "出差费用");
         base2.put("item2", "300");
@@ -156,7 +164,7 @@ public class ConcatController {
         listItemsByType.add(base2);
         listItemsByType.add(base3);
 
-
+*/
         // 获取word模板中的所有图表元素，用map存放
         // 为什么不用list保存：查看doc.getRelations()的源码可知，源码中使用了hashMap读取文档图表元素，
         // 对relations变量进行打印后发现，图表顺序和文档中的顺序不一致，也就是说relations的图表顺序不是文档中从上到下的顺序
@@ -183,6 +191,6 @@ public class ConcatController {
         // 第2个图表-饼图
         POIXMLDocumentPart poixmlDocumentPart4 = chartsMap.get("/word/charts/chart2.xml");
         new PoiWordTools().replacePieCharts(poixmlDocumentPart4, titleArr, fldNameArr, listItemsByType);
-
+        }
     }
 }

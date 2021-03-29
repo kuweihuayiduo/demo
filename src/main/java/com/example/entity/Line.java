@@ -20,6 +20,15 @@ public class Line{
 	private String rd;
 	private String ra;
 	private String time;
+	private Bank bank;
+
+	public Bank getBank() {
+		return bank;
+	}
+
+	public void setBank(Bank bank) {
+		this.bank = bank;
+	}
 
 	public Integer getId() {
 		return id;

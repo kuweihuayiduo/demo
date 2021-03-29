@@ -8,8 +8,7 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 import java.util.Map;
 public interface ConcatDao {
-    @Select("select * from line")
     List<Line> selectLine();
-    @Select("select * from bar")
-    List<Bar> selectBar();
+
+    List<Bar> selectBar(String bank_no);
 }
