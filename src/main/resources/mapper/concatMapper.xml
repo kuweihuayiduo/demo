@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.dao.ConcatDao">
+    <select id="selectLine" parameterType="com.example.entity.Line" resultType="com.example.entity.Line">
+        SELECT
+            l.id,
+            l.bank_no,
+            b.remark,
+            l.count,
+            l.xjujue,
+            l.xtongguo,
+            l.rjujue,
+            l.rtongguo,
+            l.jujue,
+            l.tongguo,
+            l.xkexin,
+            l.rd,
+            l.ra,
+            l.time
+        FROM
+            line AS l
+                JOIN bank AS b ON l.bank_no = b.bank_no
+   </select>
+    <select id="selectBar" parameterType="com.example.entity.Bar" resultType="com.example.entity.Bar">
+
+        SELECT
+            b.id,b.bank_no,b.`name`,b.memo,b.rank, b.recode,b.count, b.time
+        FROM
+            bar AS b where b.bank_no=#{bank_no} order by b.count desc
+
+    </select>
+
+</mapper>
