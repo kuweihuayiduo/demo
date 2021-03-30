@@ -8,14 +8,19 @@ import com.example.util.PoiWordTools;
 import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.poi.ooxml.POIXMLDocumentPart;
-import org.apache.poi.xwpf.usermodel.XWPFChart;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.util.Units;
+import org.apache.poi.xwpf.usermodel.*;
+import org.apache.xmlbeans.XmlCursor;
 import org.hibernate.validator.constraints.Range;
 import org.junit.jupiter.api.Test;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTVMerge;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STMerge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.annotation.Resource;
@@ -73,7 +78,7 @@ public class ConcatController {
      * @Description: 替换段落和表格中
      */
     public void replaceAll(XWPFDocument doc, Line ls, List<Bar> bar) throws Exception {
-        //doParagraphs(doc); // 处理段落文字数据，包括文字和表格、图片
+        doParagraphs(doc); // 处理段落文字数据，包括文字和表格、图片
         doCharts(doc, ls, bar);  // 处理图表数据，柱状图、折线图、饼图啊之类的
     }
 
@@ -172,7 +177,7 @@ public class ConcatController {
         doCharts3(chartsMap, ls);
         try {
             // 第2个图表-饼图
-            POIXMLDocumentPart poixmlDocumentPart4 = chartsMap.get("/word/charts/chart2.xml");
+            POIXMLDocumentPart poixmlDocumentPart4 = chartsMap.get("/word/charts/chart3.xml");
             new PoiWordTools().replacePieCharts(poixmlDocumentPart4, titleArr, fldNameArr, listItemsByType);
 
         } catch (Exception e) {
@@ -181,4 +186,44 @@ public class ConcatController {
         }
 
     }
+    /**
+     * 处理段落文字
+     *
+     * @param doc
+     * @throws InvalidFormatException
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    public static void doParagraphs(XWPFDocument doc) throws Exception {
+
+        // 文本数据
+        Map<String, String> textMap = new HashMap<String, String>();
+        textMap.put("var", "我是被替换的文本内容");
+
+        /**----------------------------处理段落------------------------------------**/
+        List<XWPFParagraph> paragraphList = doc.getParagraphs();
+        if (paragraphList != null && paragraphList.size() > 0) {
+            for (XWPFParagraph paragraph : paragraphList) {
+                List<XWPFRun> runs = paragraph.getRuns();
+                for (XWPFRun run : runs) {
+                    String text = run.getText(0);
+                    if (text != null) {
+
+                        // 替换文本信息
+                        String tempText = text;
+                        String key = tempText.replaceAll("\\{\\{", "").replaceAll("}}", "");
+                        if (!StringUtils.isEmpty(textMap.get(key))) {
+                            run.setText(textMap.get(key), 0);
+                        }
+
+
+
+
+
+                    }
+                }
+            }
+        }
+    }
+
 }
