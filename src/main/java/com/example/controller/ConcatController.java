@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.annotation.Resource;
 import java.io.*;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -78,7 +79,7 @@ public class ConcatController {
      * @Description: 替换段落和表格中
      */
     public void replaceAll(XWPFDocument doc, Line ls, List<Bar> bar) throws Exception {
-        doParagraphs(doc); // 处理段落文字数据，包括文字和表格、图片
+        doParagraphs(doc,ls,bar); // 处理段落文字数据，包括文字和表格、图片
         doCharts(doc, ls, bar);  // 处理图表数据，柱状图、折线图、饼图啊之类的
     }
 
@@ -186,6 +187,24 @@ public class ConcatController {
         }
 
     }
+
+    /**
+     *
+     * @param ls
+     * @return 计算风险率
+     *
+     */
+    public static  Map<String,String> value(Line ls){
+        Map<String,String> result = new HashMap();
+        NumberFormat nf = NumberFormat.getPercentInstance();
+        nf.setMinimumFractionDigits(2);
+        Double fd_fengkong=Double.valueOf(ls.getCount())/Double.valueOf(ls.getXjujue());
+        result.put("fd_fengkong",nf.format(fd_fengkong));
+
+
+        return result;
+    }
+
     /**
      * 处理段落文字
      *
@@ -194,11 +213,15 @@ public class ConcatController {
      * @throws FileNotFoundException
      * @throws IOException
      */
-    public static void doParagraphs(XWPFDocument doc) throws Exception {
-
+    public static void doParagraphs(XWPFDocument doc,Line ls ,List<Bar> bar) throws Exception {
+        Map<String,String> resultMap =value(ls);
         // 文本数据
         Map<String, String> textMap = new HashMap<String, String>();
-        textMap.put("var", "我是被替换的文本内容");
+       // textMap.put("var", "我是被替换的文本内容");
+        for(String key : resultMap.keySet()){
+            String value = resultMap.get(key);
+            textMap.put(key,value);
+        }
 
         /**----------------------------处理段落------------------------------------**/
         List<XWPFParagraph> paragraphList = doc.getParagraphs();
@@ -215,9 +238,6 @@ public class ConcatController {
                         if (!StringUtils.isEmpty(textMap.get(key))) {
                             run.setText(textMap.get(key), 0);
                         }
-
-
-
 
 
                     }
