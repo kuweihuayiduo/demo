@@ -19,7 +19,15 @@ public class Bar {
     private String count;
     private Date time;
     private Bank bank;
+    private String remark;
 
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
     public Bank getBank() {
         return bank;
     }

@@ -41,7 +41,7 @@ public class ConcatServiceImpl  implements ConcatService {
                     result.add(b);
                 }
           }
-        System.out.println("---------"+result.toString());
+        //System.out.println("---------"+result.toString());
 
         if(result.size()>=5){
                 return result.subList(0,5);

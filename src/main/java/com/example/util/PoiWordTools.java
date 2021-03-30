@@ -66,7 +66,7 @@ public class PoiWordTools {
         CTPlotArea plotArea = ctChart.getPlotArea();
 
         // 设置标题
-        new PoiWordTitle().setBarTitle(ctChart, "我是修改后的标题");
+        new PoiWordTitle().setBarTitle(ctChart, "欺诈监控");
 
         CTBarChart barChart = plotArea.getBarChartArray(0);
         List<CTBarSer> BarSerList = barChart.getSerList();  // 获取柱状图单位
@@ -74,7 +74,8 @@ public class PoiWordTools {
         //刷新内置excel数据
         new PoiWordTools().refreshExcel(chart, listItemsByType, fldNameArr, titleArr);
         //刷新页面显示数据
-        refreshBarStrGraphContent(barChart, BarSerList, listItemsByType, fldNameArr, 1);
+
+        new PoiWordTools().refreshBarStrGraphContent(barChart, BarSerList, listItemsByType, fldNameArr, 1);
 
 
     }
@@ -114,14 +115,13 @@ public class PoiWordTools {
         //根据属性第一列名称切换数据类型
         CTChart ctChart = chart.getCTChart();
         CTPlotArea plotArea = ctChart.getPlotArea();
-
         CTPieChart pieChart = plotArea.getPieChartArray(0);
         List<CTPieSer> pieSerList = pieChart.getSerList();  // 获取饼图单位
 
         //刷新内置excel数据
         new PoiWordTools().refreshExcel(chart, listItemsByType, fldNameArr, titleArr);
         //刷新页面显示数据
-        new PoiWordTools().refreshPieStrGraphContent(pieChart, pieSerList, listItemsByType, fldNameArr, 1);
+       refreshPieStrGraphContent(pieChart, pieSerList, listItemsByType, fldNameArr, 1);
 
     }
 
@@ -363,7 +363,7 @@ public class PoiWordTools {
 
             //数据区域
             String numDataRange = new CellRangeAddress(1, dataList.size(), i + position, i + position)
-                    .formatAsString("Sheet1", true);
+                    .formatAsString("Sheet1", true                                                                                                                                                                    );
             val.getNumRef().setF(numDataRange);
         }
         return result;

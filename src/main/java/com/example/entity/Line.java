@@ -21,6 +21,16 @@ public class Line{
 	private String ra;
 	private String time;
 	private Bank bank;
+	private String remark;
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+
 
 	public Bank getBank() {
 		return bank;
