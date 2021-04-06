@@ -253,6 +253,7 @@ public class PoiWordTools {
             // 设置标题 用以下这个方式，可以兼容office和wps
             CTSerTx tx = ser.getTx();
             // tx.getStrRef().getStrCache().getPtList().get(0).setV("嘿嘿嘿");
+            tx.getStrRef().getStrCache().getPtList().get(0).setV("欺诈监控"); // wps和office都能打开
 
             // Category Axis Data
             cat = ser.getCat();
@@ -322,6 +323,8 @@ public class PoiWordTools {
             CTAxDataSource cat = null;
             CTNumDataSource val = null;
             CTPieSer ser = ((CTPieChart) typeChart).getSerArray(i);
+            CTSerTx tx = ser.getTx();
+            tx.getStrRef().getStrCache().getPtList().get(0).setV("行内规则"); // wps和office都能打开
 
             //tx.getStrRef().getStrCache().getPtList().get(0).setV("阿里嘎痛");
             // Category Axis Data

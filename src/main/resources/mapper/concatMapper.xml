@@ -24,7 +24,7 @@
     <select id="selectBar" parameterType="com.example.entity.Bar" resultType="com.example.entity.Bar">
 
         SELECT
-            b.id,b.bank_no,b.`name`,b.memo,b.rank, b.recode,b.count, b.time
+            b.id,b.bank_no,b.`name`,b.memo,b.rank, b.recode,b.count, b.time,b.rsname
         FROM
             bar AS b where b.bank_no=#{bank_no} order by b.count desc
 

@@ -20,6 +20,15 @@ public class Bar {
     private Date time;
     private Bank bank;
     private String remark;
+    private String rsname;
+
+    public String getRsname() {
+        return rsname;
+    }
+
+    public void setRsname(String rsname) {
+        this.rsname = rsname;
+    }
 
     public String getRemark() {
         return remark;

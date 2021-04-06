@@ -24,12 +24,15 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.annotation.Resource;
+import javax.xml.ws.Response;
 import java.io.*;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static java.lang.Integer.parseInt;
 
 /**
  * @ClassName:ConcatController
@@ -49,17 +52,17 @@ public class ConcatController {
 
     public void inputRun() throws Exception {
         List<Line> ls = concatService.selectLine();
+
         for (int i = 0; i < ls.size(); i++) {
             // System.out.println(ls.get(i).getBank().getRemark().toString());
-            final String returnurl = "E:\\workstudy\\demo\\testdemo\\" + ls.get(i).getBank_no() + "-" + ls.get(i).getRemark() + ".docx";  // 结果文件
+            final String returnurl = "E:\\workstudy\\demo\\testdemo\\" + ls.get(i).getBank_no() + "-" + ls.get(i).getRemark() + ".doc";  // 结果文件
             final String templateurl = "E:\\workstudy\\demo\\417.docx";  // 模板文件
             InputStream is = new FileInputStream(new File(templateurl));
             XWPFDocument doc = new XWPFDocument(is);
             List<Bar> bar = concatService.selectBar(ls.get(i).getBank_no());
-
             // 替换word模板数据
 
-            replaceAll(doc, ls.get(i), bar);
+            replaceAll(doc, ls.get(i), bar,ls);
             // 保存结果文件
             try {
                 File file = new File(returnurl);
@@ -78,8 +81,8 @@ public class ConcatController {
     /**
      * @Description: 替换段落和表格中
      */
-    public void replaceAll(XWPFDocument doc, Line ls, List<Bar> bar) throws Exception {
-        doParagraphs(doc,ls,bar); // 处理段落文字数据，包括文字和表格、图片
+    public void replaceAll(XWPFDocument doc, Line ls, List<Bar> bar,List<Line> lslist) throws Exception {
+        doParagraphs(doc,ls,bar,lslist); // 处理段落文字数据，包括文字和表格、图片
         doCharts(doc, ls, bar);  // 处理图表数据，柱状图、折线图、饼图啊之类的
     }
 
@@ -168,6 +171,8 @@ public class ConcatController {
                 String key = str.replaceAll("Name: ", "")
                         .replaceAll(" - Content Type: application/vnd\\.openxmlformats-officedocument\\.drawingml\\.chart\\+xml", "").trim();
                 //System.out.println("key：" + key);
+               // String key = str.replaceAll("Name: ", "")
+                     //   .replaceAll(" - Content Type: application/vnd\\.openxmlformats-officedocument\\.wordprocessingml\\.chart\\+xml", "").trim();
 
                 chartsMap.put(key, poixmlDocumentPart);
             }
@@ -194,14 +199,49 @@ public class ConcatController {
      * @return 计算风险率
      *
      */
-    public static  Map<String,String> value(Line ls){
+    public static  Map<String,String> value(Line ls,List<Line> lslist,List<Bar> bar){
+        int sumCount = 0;
+        int sumKeyi = 0;
+        for (int i = 0; i < lslist.size(); i++) {
+            sumCount = sumCount + parseInt(lslist.get(i).getCount());
+            sumKeyi = sumKeyi + parseInt(lslist.get(i).getXjujue());
+        }
         Map<String,String> result = new HashMap();
         NumberFormat nf = NumberFormat.getPercentInstance();
         nf.setMinimumFractionDigits(2);
-        Double fd_fengkong=Double.valueOf(ls.getCount())/Double.valueOf(ls.getXjujue());
-        result.put("fd_fengkong",nf.format(fd_fengkong));
+        Double xd_fengxian = Double.valueOf(ls.getXjujue())/Double.valueOf(ls.getCount());
+        Double yujing = Double.valueOf(ls.getJujue())/Double.valueOf(ls.getRjujue());
+        Double jujue = Double.valueOf(ls.getJujue())/Double.valueOf(ls.getCount());
+        Double avg_fengkong = Double.valueOf(sumKeyi)/Double.valueOf(sumCount);
+        Double chazhi = Double.valueOf(avg_fengkong)-Double.valueOf(yujing);
+        //条图的文字变量
+        result.put("xd_fengxian",nf.format(xd_fengxian));//系统提示风险
+        result.put("bank_no",ls.getRemark());//银行号
+        result.put("yujing",nf.format(yujing));//实际预警
+        result.put("jujue",nf.format(jujue));//实际拒绝数量
+        result.put("avg_fengkong",nf.format(avg_fengkong));//平均实际风险控制率
+        result.put("chazhi",nf.format(Math.abs(chazhi)));//差值
+      /*  for (Bar rs: bar) {
+            if (!rsName.contains(rs.getRsname())) {//去重代码
+                rsName.add(rs);
+            }
+        }     List<Bar> rsName = new ArrayList();*/
+        //String rsName ;
 
+      //  System.out.println(rsName);
+       // String re = "";
+        //String rs = "";
+        StringBuffer re = new StringBuffer();
+        for (int i = 0; i <bar.size() ; i++) {
 
+            re.append("在规则中占比较高的为”" + bar.get(i).getMemo()+"“;");
+          //  rs.concat("“"+rsName.get(i).getRsname()+"“，");
+           // System.out.println(re);
+        }
+        System.out.println(re.toString());
+        //System.out.println(re+"-----"+rs);
+     //   result.put("rs",rs);
+        result.put("re",re.toString());
         return result;
     }
 
@@ -213,11 +253,13 @@ public class ConcatController {
      * @throws FileNotFoundException
      * @throws IOException
      */
-    public static void doParagraphs(XWPFDocument doc,Line ls ,List<Bar> bar) throws Exception {
-        Map<String,String> resultMap =value(ls);
+    public static void doParagraphs(XWPFDocument doc,Line ls ,List<Bar> bar,List<Line> lslist) throws Exception {
+        Map<String,String> resultMap =value(ls,lslist,bar);
         // 文本数据
         Map<String, String> textMap = new HashMap<String, String>();
        // textMap.put("var", "我是被替换的文本内容");
+        //饼图的文字变量
+
         for(String key : resultMap.keySet()){
             String value = resultMap.get(key);
             textMap.put(key,value);
