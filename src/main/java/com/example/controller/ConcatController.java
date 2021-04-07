@@ -3,28 +3,18 @@ package com.example.controller;
 import com.example.entity.Bar;
 import com.example.entity.Line;
 import com.example.service.ConcatService;
-import com.example.service.Impl.ConcatServiceImpl;
 import com.example.util.PoiWordTools;
-import jdk.nashorn.internal.ir.annotations.Ignore;
-import org.apache.ibatis.session.SqlSession;
+
 import org.apache.poi.ooxml.POIXMLDocumentPart;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.util.Units;
 import org.apache.poi.xwpf.usermodel.*;
-import org.apache.xmlbeans.XmlCursor;
-import org.hibernate.validator.constraints.Range;
-import org.junit.jupiter.api.Test;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTVMerge;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STMerge;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.annotation.Resource;
-import javax.xml.ws.Response;
 import java.io.*;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -32,12 +22,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.example.util.DateUtil.getDateFormat;
+import static com.example.util.DateUtil.getNowDate;
 import static java.lang.Integer.parseInt;
 
 /**
  * @ClassName:ConcatController
  * @Author:sq
- * @Description:自动生成word报表
+ * @Description:自动生成word报表 wps没问题，word不兼容
  * @Date:2021/3/4 16:09
  */
 @Controller
@@ -52,10 +44,12 @@ public class ConcatController {
 
     public void inputRun() throws Exception {
         List<Line> ls = concatService.selectLine();
-
+        File dir=new File("E:\\workstudy\\demo\\testdemo\\"+getDateFormat(getNowDate(),"yyyyMM"));
+        if(!dir.exists()){
+            dir.mkdir();
+        }
         for (int i = 0; i < ls.size(); i++) {
-            // System.out.println(ls.get(i).getBank().getRemark().toString());
-            final String returnurl = "E:\\workstudy\\demo\\testdemo\\" + ls.get(i).getBank_no() + "-" + ls.get(i).getRemark() + ".doc";  // 结果文件
+            final String returnurl = "E:\\workstudy\\demo\\testdemo\\"+getDateFormat(getNowDate(),"yyyyMM")+"\\" + ls.get(i).getBank_no() + "-" + ls.get(i).getRemark() + ".docx";  // 结果文件
             final String templateurl = "E:\\workstudy\\demo\\417.docx";  // 模板文件
             InputStream is = new FileInputStream(new File(templateurl));
             XWPFDocument doc = new XWPFDocument(is);
@@ -183,11 +177,11 @@ public class ConcatController {
         doCharts3(chartsMap, ls);
         try {
             // 第2个图表-饼图
-            POIXMLDocumentPart poixmlDocumentPart4 = chartsMap.get("/word/charts/chart3.xml");
+            POIXMLDocumentPart poixmlDocumentPart4 = chartsMap.get("/word/charts/chart2.xml");
             new PoiWordTools().replacePieCharts(poixmlDocumentPart4, titleArr, fldNameArr, listItemsByType);
 
         } catch (Exception e) {
-            logger.info("{}--{}规则数据没有，请核实！", ls.getBank_no(), ls.getRemark());
+            logger.info("{}--{}规则数据无，请核实！", ls.getBank_no(), ls.getRemark());
             // e.printStackTrace();
         }
 
@@ -232,15 +226,16 @@ public class ConcatController {
        // String re = "";
         //String rs = "";
         StringBuffer re = new StringBuffer();
-        for (int i = 0; i <bar.size() ; i++) {
 
-            re.append("在规则中占比较高的为”" + bar.get(i).getMemo()+"“;");
-          //  rs.concat("“"+rsName.get(i).getRsname()+"“，");
-           // System.out.println(re);
+        if(bar.size()>1){
+            re.append("在“"+bar.get(0).getRsname()+"”规则中占比较高的为“" + bar.get(0).getMemo()+"”;");
+            re.append("其次，在“"+bar.get(1).getRsname()+"”规则中占比较高的为“" + bar.get(1).getMemo()+"”。");
+
+        }else if(bar.size()==1){
+            re.append("在“"+bar.get(0).getRsname()+"”规则中占比较高的为“" + bar.get(0).getMemo()+"”。");
+        }else{
+            System.out.println("银行"+ls.getBank());
         }
-        System.out.println(re.toString());
-        //System.out.println(re+"-----"+rs);
-     //   result.put("rs",rs);
         result.put("re",re.toString());
         return result;
     }

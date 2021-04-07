@@ -135,6 +135,7 @@ public class DateUtil {
      * @return
      */
     public static Date getNowDate() {
+
         return DateUtil.getDateFormat(dateFormat.format(new Date()));
     }
 
@@ -335,4 +336,78 @@ public class DateUtil {
         c.add(Calendar.MONTH, -monty);
         return c.getTime();
     }
+
+    /**
+
+     * 获取指定月的前一月(年)或后一月(年)
+
+     * @param dateStr
+
+     * @param addYear
+
+     * @param addMonth
+
+     * @param addDate
+
+     * @return 输入的时期格式为yyyy-MM，输出的日期格式为yyyy-MM
+
+     * @throws Exception
+
+     */
+
+    public static String getLastMonth(String dateStr,int addYear, int addMonth, int addDate) throws Exception {
+        try {
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM");
+
+            java.util.Date sourceDate = sdf.parse(dateStr);
+
+            Calendar cal = Calendar.getInstance();
+
+            cal.setTime(sourceDate);
+
+            cal.add(Calendar.YEAR,addYear);
+
+            cal.add(Calendar.MONTH, addMonth);
+
+            cal.add(Calendar.DATE, addDate);
+
+            java.text.SimpleDateFormat returnSdf = new java.text.SimpleDateFormat("yyyy-MM");
+
+            String dateTmp = returnSdf.format(cal.getTime());
+
+            java.util.Date returnDate = returnSdf.parse(dateTmp);
+
+            return dateTmp;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            throw new Exception(e.getMessage());
+
+        }
+
+    }
+
+    /**
+
+     * 测试
+
+     * @param args
+
+     */
+
+    public static void main(String[] args) {
+        try{
+            System.out.println(getDateFormat(getNowDate(),"yyyyMM"));
+            System.out.println(getLastMonth("2011-06",0,-1,0));//2011-05
+
+            System.out.println(getLastMonth("2011-06",0,-6,0));//2010-12
+
+            System.out.println(getLastMonth("2011-06",-1,0,0));//2010-06
+
+        }catch (Exception e) {
+        }
+
+    }
+
 }

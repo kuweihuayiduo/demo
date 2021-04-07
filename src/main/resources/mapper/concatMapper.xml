@@ -19,14 +19,16 @@
             l.time
         FROM
             line AS l
-                JOIN bank AS b ON l.bank_no = b.bank_no
+                JOIN bank AS b ON l.bank_no = b.bank_no where
+        date_format(l.time,'%Y-%m-%d')>=date_format("2021-04-01",'%Y-%m-%d')
    </select>
     <select id="selectBar" parameterType="com.example.entity.Bar" resultType="com.example.entity.Bar">
 
         SELECT
             b.id,b.bank_no,b.`name`,b.memo,b.rank, b.recode,b.count, b.time,b.rsname
         FROM
-            bar AS b where b.bank_no=#{bank_no} order by b.count desc
+            bar AS b where b.bank_no=#{bank_no} and date_format(b.time,'%Y-%m-%d')>=date_format("2021-04-01",'%Y-%m-%d')
+        order by b.count desc
 
     </select>
 
